@@ -86,6 +86,9 @@ class KugoAccessibilityService : AccessibilityService() {
 
         if (State.serviceRunning && event.keyCode == Prefs.keyCode(this)) {
             State.enabled = !State.enabled
+            // Ao alternar, descarta qualquer estado de mouse "preso" (ex.: soltar o botão
+            // enquanto o jogo capturava o cursor não gera evento para o app).
+            State.releaseMouse()
             Engine.refresh()
         }
         // Não consome a tecla: ela continua funcionando normalmente no app/jogo.

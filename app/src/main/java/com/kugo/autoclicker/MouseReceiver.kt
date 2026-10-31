@@ -14,9 +14,14 @@ class MouseReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != "com.kugo.autoclicker.MOUSE") return
         Engine.init(context.applicationContext)
-        State.extEvents++
-        State.lastExtTime = SystemClock.elapsedRealtime()
-        State.mouseExt = intent.getBooleanExtra("down", false)
+        val now = SystemClock.elapsedRealtime()
+        State.lastExtPing = now
+        if (intent.hasExtra("down")) {
+            State.extEvents++
+            State.lastExtTime = now
+            State.mouseExt = intent.getBooleanExtra("down", false)
+        }
+        // Sem extra "down" = apenas ping de sinal de vida.
         Engine.refresh()
     }
 }

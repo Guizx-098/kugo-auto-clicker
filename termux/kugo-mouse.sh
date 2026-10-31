@@ -9,6 +9,10 @@ send() {
   am broadcast -n "$PKG/.MouseReceiver" -a "$PKG.MOUSE" --ez down "$1" >/dev/null 2>&1
 }
 
+ping() {
+  am broadcast -n "$PKG/.MouseReceiver" -a "$PKG.MOUSE" >/dev/null 2>&1
+}
+
 if ! command -v adb >/dev/null 2>&1; then
   echo "adb não encontrado. Instale com: pkg install android-tools"
   exit 1
@@ -33,8 +37,8 @@ adb shell getevent -l 2>/dev/null | while true; do
   else
     rc=$?
     if [ "$rc" -gt 128 ]; then
-      # sem eventos há 1 s: reenvia "pressionado" como sinal de vida
-      [ "$down" = "1" ] && send true
+      # sem eventos há 1 s: sinal de vida (reenvia "pressionado" se o botão está segurado)
+      if [ "$down" = "1" ]; then send true; else ping; fi
     else
       break
     fi

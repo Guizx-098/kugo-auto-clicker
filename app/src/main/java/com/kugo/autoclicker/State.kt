@@ -1,5 +1,7 @@
 package com.kugo.autoclicker
 
+import android.os.SystemClock
+
 /** Estado compartilhado entre serviços, motor e interface. */
 object State {
     /** Serviço em primeiro plano iniciado pelo botão INICIAR. */
@@ -17,10 +19,16 @@ object State {
     /** Botão esquerdo pressionado segundo a ponte Termux/ADB (sem root). */
     @Volatile var mouseExt = false
     @Volatile var lastExtTime = 0L
+
+    /** Última vez que a ponte deu qualquer sinal de vida (aviso de botão ou ping). */
+    @Volatile var lastExtPing = 0L
+
+    /** Ponte Termux/ADB ativa: quando está viva, ela é a única fonte confiável do botão. */
+    val extAlive: Boolean get() = lastExtPing != 0L && SystemClock.elapsedRealtime() - lastExtPing < 3000L
     @Volatile var extEvents = 0L
 
     /** Botão esquerdo do mouse fisicamente pressionado (qualquer fonte). */
-    val mouseDown: Boolean get() = mouseA11y || mouseRoot || mouseExt
+    val mouseDown: Boolean get() = if (extAlive) mouseExt else (mouseA11y || mouseRoot || mouseExt)
 
     fun releaseMouse() {
         mouseA11y = false
