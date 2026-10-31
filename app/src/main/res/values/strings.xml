@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">KUGO AUTO CLICKER</string>
+    <string name="a11y_desc">Detecta a tecla de ativação do teclado e executa os cliques automáticos enquanto o botão esquerdo do mouse estiver pressionado.</string>
+</resources>

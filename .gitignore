@@ -1,0 +1,29 @@
+# Gradle / Android
+.gradle/
+build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Segredos e chaves (nunca enviar)
+*.jks
+*.keystore
+keystore.properties
+*.pem
+*.key
+.env
+
+# Sistema
+.DS_Store
+Thumbs.db
