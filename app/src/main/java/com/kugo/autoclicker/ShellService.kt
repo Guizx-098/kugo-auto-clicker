@@ -46,6 +46,7 @@ class ShellService : Binder() {
     @Volatile private var btnEvents = 0L
     @Volatile private var lastBtn = "nenhum"
     private val firstLines = ArrayList<String>()
+    private val btnLabels = LinkedHashSet<String>()
     @Volatile private var injOk = 0L
     @Volatile private var injFail = 0L
     @Volatile private var lastError = "nenhum"
@@ -80,6 +81,7 @@ class ShellService : Binder() {
             "getevent: " + geteventState + ", linhas=" + lines + ", BTN_LEFT=" + btnEvents +
             " (último: " + lastBtn + ")\n" +
             "primeiras linhas: " + (if (fl.isEmpty()) "nenhuma" else fl) + "\n" +
+            "botões BTN_ vistos: " + synchronized(btnLabels) { if (btnLabels.isEmpty()) "nenhum" else btnLabels.joinToString(", ") } + "\n" +
             "avisos enviados ao app: " + cbSent + "\n" +
             "injetor: " + injectorName + ", ok=" + injOk + ", falhas=" + injFail + "\n" +
             "último erro: " + lastError
@@ -105,6 +107,7 @@ class ShellService : Binder() {
         if (running) return
         running = true
         geteventState = "iniciando"
+        try { prepareInjector() } catch (_: Throwable) {}
 
         Thread({
             try {
@@ -120,13 +123,21 @@ class ShellService : Binder() {
                     synchronized(firstLines) {
                         if (firstLines.size < 3) firstLines.add(line.take(90))
                     }
-                    if (!line.contains("BTN_LEFT")) continue
+                    if (!line.contains("EV_KEY")) continue
+                    val t = line.trim().split(Regex("\\s+"))
+                    if (t.size < 4 || t[1] != "EV_KEY") continue
+                    val code = t[2]
+                    if (code.startsWith("BTN_")) {
+                        synchronized(btnLabels) { if (btnLabels.size < 12) btnLabels.add(code) }
+                    }
+                    // O Android pode escrever o botão esquerdo como BTN_LEFT ou BTN_MOUSE (mesmo código).
+                    if (code != "BTN_LEFT" && code != "BTN_MOUSE") continue
                     btnEvents++
-                    lastBtn = line.trim().takeLast(40)
-                    if (line.contains("DOWN")) {
+                    lastBtn = code + " " + t[3]
+                    if (t[3] == "DOWN") {
                         down = true
                         send(CB_BUTTON, 1)
-                    } else if (line.contains("UP")) {
+                    } else if (t[3] == "UP") {
                         down = false
                         send(CB_BUTTON, 0)
                     }
