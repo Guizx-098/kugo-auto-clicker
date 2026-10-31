@@ -3,7 +3,6 @@ package com.kugo.autoclicker
 import android.os.Binder
 import android.os.IBinder
 import android.os.Parcel
-import android.os.Process
 import android.os.SystemClock
 import android.view.InputDevice
 import android.view.InputEvent
@@ -77,7 +76,7 @@ class ShellService : Binder() {
 
     private fun info(): String {
         val fl = synchronized(firstLines) { firstLines.joinToString(" | ") }
-        return "uid=" + Process.myUid() + " pid=" + Process.myPid() + "\n" +
+        return "uid=" + android.os.Process.myUid() + " pid=" + android.os.Process.myPid() + "\n" +
             "getevent: " + geteventState + ", linhas=" + lines + ", BTN_LEFT=" + btnEvents +
             " (último: " + lastBtn + ")\n" +
             "primeiras linhas: " + (if (fl.isEmpty()) "nenhuma" else fl) + "\n" +
