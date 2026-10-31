@@ -3,10 +3,12 @@ package com.kugo.autoclicker
 import android.os.Binder
 import android.os.IBinder
 import android.os.Parcel
+import android.os.Process
 import android.os.SystemClock
 import android.view.InputDevice
 import android.view.InputEvent
 import android.view.MotionEvent
+import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
 /**
@@ -22,6 +24,7 @@ class ShellService : Binder() {
         const val T_START = 2
         const val T_STOP = 3
         const val T_CLICK = 4
+        const val T_INFO = 5
 
         const val CB_BUTTON = 1
         const val CB_PING = 2
@@ -38,6 +41,18 @@ class ShellService : Binder() {
     private var injectMethod: Method? = null
     private var injectArgs = 2
 
+    // diagnóstico
+    @Volatile private var geteventState = "não iniciado"
+    @Volatile private var lines = 0L
+    @Volatile private var btnEvents = 0L
+    @Volatile private var lastBtn = "nenhum"
+    private val firstLines = ArrayList<String>()
+    @Volatile private var injOk = 0L
+    @Volatile private var injFail = 0L
+    @Volatile private var lastError = "nenhum"
+    @Volatile private var injectorName = "não preparado"
+    @Volatile private var cbSent = 0L
+
     override fun onTransact(code: Int, data: Parcel, reply: Parcel?, flags: Int): Boolean {
         return try {
             when (code) {
@@ -51,11 +66,24 @@ class ShellService : Binder() {
                     click(x, y, mode)
                     true
                 }
+                T_INFO -> { reply?.writeString(info()); true }
                 else -> super.onTransact(code, data, reply, flags)
             }
-        } catch (_: Throwable) {
+        } catch (t: Throwable) {
+            lastError = "onTransact($code): " + t
             false
         }
+    }
+
+    private fun info(): String {
+        val fl = synchronized(firstLines) { firstLines.joinToString(" | ") }
+        return "uid=" + Process.myUid() + " pid=" + Process.myPid() + "\n" +
+            "getevent: " + geteventState + ", linhas=" + lines + ", BTN_LEFT=" + btnEvents +
+            " (último: " + lastBtn + ")\n" +
+            "primeiras linhas: " + (if (fl.isEmpty()) "nenhuma" else fl) + "\n" +
+            "avisos enviados ao app: " + cbSent + "\n" +
+            "injetor: " + injectorName + ", ok=" + injOk + ", falhas=" + injFail + "\n" +
+            "último erro: " + lastError
     }
 
     // ---------- leitura do botão ----------
@@ -66,7 +94,9 @@ class ShellService : Binder() {
         try {
             d.writeInt(v)
             cb.transact(code, d, null, IBinder.FLAG_ONEWAY)
-        } catch (_: Throwable) {
+            cbSent++
+        } catch (t: Throwable) {
+            lastError = "aviso ao app: " + t
         } finally {
             d.recycle()
         }
@@ -75,15 +105,25 @@ class ShellService : Binder() {
     private fun start() {
         if (running) return
         running = true
+        geteventState = "iniciando"
 
         Thread({
             try {
-                val p = Runtime.getRuntime().exec(arrayOf("getevent", "-l"))
+                val p = ProcessBuilder("/system/bin/getevent", "-l")
+                    .redirectErrorStream(true)
+                    .start()
                 proc = p
+                geteventState = "lendo"
                 val br = p.inputStream.bufferedReader()
                 while (running) {
                     val line = br.readLine() ?: break
+                    lines++
+                    synchronized(firstLines) {
+                        if (firstLines.size < 3) firstLines.add(line.take(90))
+                    }
                     if (!line.contains("BTN_LEFT")) continue
+                    btnEvents++
+                    lastBtn = line.trim().takeLast(40)
                     if (line.contains("DOWN")) {
                         down = true
                         send(CB_BUTTON, 1)
@@ -92,7 +132,11 @@ class ShellService : Binder() {
                         send(CB_BUTTON, 0)
                     }
                 }
-            } catch (_: Throwable) {
+                val code = try { p.waitFor() } catch (_: Throwable) { -1 }
+                geteventState = "encerrado (exit=$code)"
+            } catch (t: Throwable) {
+                geteventState = "erro"
+                lastError = "getevent: " + t
             } finally {
                 down = false
                 send(CB_BUTTON, 0)
@@ -124,12 +168,14 @@ class ShellService : Binder() {
             "android.hardware.input.InputManagerGlobal",
             "android.hardware.input.InputManager"
         )
+        val tried = StringBuilder()
         for (cn in classes) {
             try {
                 val cls = Class.forName(cn)
                 val gi = cls.getDeclaredMethod("getInstance")
                 gi.isAccessible = true
-                val inst = gi.invoke(null) ?: continue
+                val inst = gi.invoke(null)
+                if (inst == null) { tried.append(cn.substringAfterLast('.')).append(": instância nula; "); continue }
                 for (m in cls.declaredMethods) {
                     val pt = m.parameterTypes
                     if (m.name == "injectInputEvent" && pt.isNotEmpty() && pt[0] == InputEvent::class.java) {
@@ -137,12 +183,18 @@ class ShellService : Binder() {
                         injectTarget = inst
                         injectMethod = m
                         injectArgs = pt.size
+                        injectorName = cn.substringAfterLast('.') + ".injectInputEvent/" + pt.size
                         return true
                     }
                 }
-            } catch (_: Throwable) {
+                tried.append(cn.substringAfterLast('.')).append(": sem injectInputEvent; ")
+            } catch (t: Throwable) {
+                val c = if (t is InvocationTargetException) (t.cause ?: t) else t
+                tried.append(cn.substringAfterLast('.')).append(": ").append(c.toString().take(80)).append("; ")
             }
         }
+        injectorName = "NÃO ENCONTRADO"
+        lastError = "injetor: $tried"
         return false
     }
 
@@ -150,8 +202,13 @@ class ShellService : Binder() {
         val m = injectMethod ?: return false
         return try {
             val r = if (injectArgs >= 3) m.invoke(injectTarget, e, 0, -1) else m.invoke(injectTarget, e, 0)
-            (r as? Boolean) ?: true
-        } catch (_: Throwable) {
+            val ok = (r as? Boolean) ?: true
+            if (ok) injOk++ else { injFail++; lastError = "injectInputEvent retornou false" }
+            ok
+        } catch (t: Throwable) {
+            val c = if (t is InvocationTargetException) (t.cause ?: t) else t
+            injFail++
+            lastError = "inject: " + c.toString().take(120)
             false
         }
     }
@@ -188,7 +245,6 @@ class ShellService : Binder() {
         val t = SystemClock.uptimeMillis()
         val b = MotionEvent.BUTTON_PRIMARY
         if (mode == MODE_REL) {
-            // Cursor capturado (Minecraft em jogo): eventos de mouse relativo.
             val s = InputDevice.SOURCE_MOUSE_RELATIVE
             motion(MotionEvent.ACTION_DOWN, t, 0f, 0f, b, s, 0)
             motion(MotionEvent.ACTION_BUTTON_PRESS, t, 0f, 0f, b, s, b)

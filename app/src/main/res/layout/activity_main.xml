@@ -204,6 +204,33 @@
                 android:background="@drawable/bg_btn_dark"
                 android:textColor="#FFFFFF"
                 android:textSize="12sp" />
+                    <Button
+                android:id="@+id/btnTest"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_btn_dark"
+                android:text="TESTAR CLIQUE (5 s)"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp" />
+            <TextView
+                android:id="@+id/tvReport"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="monospace"
+                android:textColor="#C9CDD2"
+                android:textIsSelectable="true"
+                android:textSize="10sp" />
+            <Button
+                android:id="@+id/btnCopy"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_btn_dark"
+                android:text="COPIAR RELATÓRIO"
+                android:textColor="#B6FF00"
+                android:textSize="12sp" />
         </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"

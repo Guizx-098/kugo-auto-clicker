@@ -8,6 +8,8 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.provider.Settings
 import android.widget.Button
 import android.widget.SeekBar
@@ -85,6 +87,23 @@ class MainActivity : Activity() {
         }
         ShizukuBridge.init(this)
         findViewById<Button>(R.id.btnShizuku).setOnClickListener { ShizukuBridge.connect(this) }
+        findViewById<Button>(R.id.btnCopy).setOnClickListener {
+            val cm = getSystemService(ClipboardManager::class.java)
+            cm.setPrimaryClip(ClipData.newPlainText("KUGO", ShizukuBridge.report(this)))
+            Toast.makeText(this, "Relatório copiado.", Toast.LENGTH_SHORT).show()
+        }
+        findViewById<Button>(R.id.btnTest).setOnClickListener {
+            val mode = Prefs.clickMode(this)
+            if (mode == 3 || !ShizukuBridge.connected) {
+                Toast.makeText(this, "Conecte o Shizuku e escolha o modo 1 ou 2 para testar.", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, "Clique de teste em 5 s no centro da tela. Vá para o jogo.", Toast.LENGTH_LONG).show()
+                val dm = resources.displayMetrics
+                ui.postDelayed({
+                    ShizukuBridge.click(dm.widthPixels / 2f, dm.heightPixels / 2f, mode)
+                }, 5000L)
+            }
+        }
         findViewById<Button>(R.id.btnMode).setOnClickListener {
             val next = if (Prefs.clickMode(this) >= 3) 1 else Prefs.clickMode(this) + 1
             Prefs.saveClickMode(this, next)
@@ -95,7 +114,7 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun startKugo() {
+    fun startKugo() {
         if (Build.VERSION.SDK_INT >= 33 &&
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) {
@@ -138,6 +157,7 @@ class MainActivity : Activity() {
         findViewById<TextView>(R.id.tvA11y).text =
             "Acessibilidade: " + if (a11yEnabled()) "ATIVA" else "DESATIVADA"
         findViewById<TextView>(R.id.tvShizuku).text = "Shizuku: " + ShizukuBridge.statusText(this)
+        findViewById<TextView>(R.id.tvReport).text = ShizukuBridge.report(this)
         findViewById<Button>(R.id.btnMode).text = "MODO DE CLIQUE: " + Prefs.clickModeName(this)
         findViewById<TextView>(R.id.tvLastKey).text = "Última tecla recebida: " + State.lastKeyName
         findViewById<TextView>(R.id.tvInput).text =
