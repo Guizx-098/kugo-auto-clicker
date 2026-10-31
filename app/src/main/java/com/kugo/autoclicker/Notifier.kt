@@ -23,14 +23,17 @@ object Notifier {
     private fun big(ctx: Context): String {
         val root = when (State.rootOk) {
             true -> "OK"
-            false -> "SEM ROOT (mouse não detectável)"
+            false -> "indisponível (sem root)"
             null -> "verificando…"
         }
+        val a11y = if (Build.VERSION.SDK_INT >= 34) "suportada (Android 14+)"
+        else "NÃO suportada (Android " + Build.VERSION.RELEASE + ")"
         return "Auto Clicker: " + (if (State.enabled) "ATIVADO" else "DESATIVADO") + "\n" +
             "Mouse: " + (if (State.mouseDown) "PRESSIONADO" else "SOLTO") + "\n" +
             "Tecla configurada: " + Prefs.keyName(ctx) + " (última recebida: " + State.lastKeyName + ")\n" +
             "Acessibilidade: " + (if (KugoAccessibilityService.instance != null) "ATIVA" else "DESATIVADA") + "\n" +
-            "Leitura do mouse (root): " + root
+            "Mouse via root: " + root + "\n" +
+            "Mouse via acessibilidade: " + a11y
     }
 
     fun build(ctx: Context): Notification {

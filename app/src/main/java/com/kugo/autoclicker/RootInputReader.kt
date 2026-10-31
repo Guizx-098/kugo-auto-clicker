@@ -32,7 +32,7 @@ object RootInputReader {
             Runtime.getRuntime().exec(arrayOf("su", "-c", "pkill -f 'getevent -l'"))
         } catch (_: Throwable) {}
         proc = null
-        State.mouseDown = false
+        State.mouseRoot = false
         Engine.refresh()
     }
 
@@ -66,8 +66,8 @@ object RootInputReader {
                     "BTN_LEFT", "BTN_TOUCH" -> {
                         State.lastInput = t[2] + " " + t[3]
                         when (t[3]) {
-                            "DOWN" -> State.mouseDown = true
-                            "UP" -> State.mouseDown = false
+                            "DOWN" -> State.mouseRoot = true
+                            "UP" -> State.mouseRoot = false
                         }
                         Engine.refresh()
                     }
@@ -85,7 +85,7 @@ object RootInputReader {
             // falha na leitura: cai para o bloco finally e solta o mouse por segurança
         } finally {
             // Mecanismo de segurança: se a leitura acabar/falhar, nunca continuar clicando.
-            State.mouseDown = false
+            State.mouseRoot = false
             Engine.refresh()
             try { proc?.destroy() } catch (_: Throwable) {}
             proc = null

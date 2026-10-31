@@ -13,7 +13,7 @@ Auto clicker para Android/emuladores controlado por **tecla global + botão esqu
 |---|---|---|
 | Tecla global | `AccessibilityService.onKeyEvent` | Ativar o serviço de acessibilidade do KUGO |
 | Gerar cliques | `dispatchGesture` (toque curto) | Mesmo serviço de acessibilidade (Android 7.0+) |
-| Mouse pressionado/solto | Leitura de eventos brutos: `su -c getevent -l` (BTN_LEFT / BTN_TOUCH) | **Root dentro do Android/emulador** |
+| Mouse pressionado/solto | Android 14+: `onMotionEvent` (sem root). Qualquer versão: `su -c getevent -l` (BTN_LEFT / BTN_TOUCH) | Android 14+ com mouse real, **ou** root |
 | Segundo plano | Foreground Service com notificação discreta | Permitir notificações (Android 13+) |
 
 ### Limitações importantes (leia)
@@ -25,6 +25,10 @@ Auto clicker para Android/emuladores controlado por **tecla global + botão esqu
 - O Android limita a frequência de gestos; CPS muito altos podem não ser atingidos em todos os aparelhos.
 - O app não contorna mecanismos de segurança do Android nem sistemas antitrapaça. Verifique as regras do jogo/servidor antes de usar.
 - O projeto **ainda não foi testado em dispositivo/emulador**.
+
+## Mouse sem root (v1.0.2)
+
+No **Android 14+ (API 34)** o serviço de acessibilidade pede os eventos de mouse (`onMotionEvent`) e acompanha o botão esquerdo sem root. Isso depende de o Android entregar eventos com origem `SOURCE_MOUSE` (mouse físico USB/Bluetooth no aparelho). Em Android anterior ao 14, ou se o emulador converter o mouse em toque, esse caminho não funciona e o app só detecta o mouse com root. A tela principal mostra a contagem de eventos de cada caminho.
 
 ## Notificação de status e diagnóstico (v1.0.1)
 

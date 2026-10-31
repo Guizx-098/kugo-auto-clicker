@@ -31,7 +31,7 @@ class KugoForegroundService : Service() {
     override fun onDestroy() {
         State.serviceRunning = false
         State.enabled = false
-        State.mouseDown = false
+        State.releaseMouse()
         RootInputReader.stop()
         Engine.refresh()
         super.onDestroy()

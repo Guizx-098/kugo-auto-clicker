@@ -132,10 +132,12 @@ class MainActivity : Activity() {
             "Acessibilidade: " + if (a11yEnabled()) "ATIVA" else "DESATIVADA"
         findViewById<TextView>(R.id.tvLastKey).text = "Última tecla recebida: " + State.lastKeyName
         findViewById<TextView>(R.id.tvInput).text =
-            "Eventos de mouse/toque lidos: " + State.inputEvents + " (último: " + State.lastInput + ")"
-        findViewById<TextView>(R.id.tvRoot).text = "Leitura do mouse (root): " + when (State.rootOk) {
+            "Mouse via acessibilidade: " + State.motionEvents + " eventos (último: " + State.lastMotion + ")\n" +
+            "Mouse via root: " + State.inputEvents + " eventos (último: " + State.lastInput + ")\n" +
+            "Android: " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")"
+        findViewById<TextView>(R.id.tvRoot).text = "Mouse via root: " + when (State.rootOk) {
             true -> "OK"
-            false -> "SEM ROOT — mouse não detectável"
+            false -> "indisponível (sem root)"
             null -> if (running) "verificando…" else "—"
         }
     }

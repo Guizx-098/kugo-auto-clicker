@@ -5,7 +5,10 @@ import android.accessibilityservice.GestureDescription
 import android.content.Intent
 import android.graphics.Path
 import android.os.Handler
+import android.os.Build
+import android.view.InputDevice
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.accessibility.AccessibilityEvent
 
 /**
@@ -21,20 +24,45 @@ class KugoAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         instance = this
         Engine.init(applicationContext)
+        if (Build.VERSION.SDK_INT >= 34) {
+            try {
+                val info = serviceInfo
+                info.motionEventSources = InputDevice.SOURCE_MOUSE
+                serviceInfo = info
+            } catch (_: Throwable) {}
+        }
+        Engine.refresh()
+    }
+
+    /**
+     * Android 14+ (API 34): eventos de mouse entregues ao serviço de acessibilidade, sem root.
+     * O estado "pressionado" segue o botão primário (esquerdo).
+     */
+    override fun onMotionEvent(event: MotionEvent) {
+        State.motionEvents++
+        State.lastMotion = MotionEvent.actionToString(event.actionMasked) + " botões=" + event.buttonState
+
+        if (event.rawX > 0f || event.rawY > 0f) {
+            Engine.x = event.rawX
+            Engine.y = event.rawY
+        }
+        val ending = event.actionMasked == MotionEvent.ACTION_UP ||
+            event.actionMasked == MotionEvent.ACTION_CANCEL
+        State.mouseA11y = !ending && (event.buttonState and MotionEvent.BUTTON_PRIMARY) != 0
         Engine.refresh()
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {}
 
     override fun onInterrupt() {
-        State.mouseDown = false
+        State.releaseMouse()
         Engine.refresh()
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
         instance = null
         State.enabled = false
-        State.mouseDown = false
+        State.releaseMouse()
         Engine.refresh()
         return super.onUnbind(intent)
     }
