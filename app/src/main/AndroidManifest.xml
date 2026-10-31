@@ -29,6 +29,10 @@
                 android:value="input_automation" />
         </service>
 
+        <receiver
+            android:name=".MouseReceiver"
+            android:exported="true" />
+
         <service
             android:name=".KugoAccessibilityService"
             android:exported="true"

@@ -3,6 +3,7 @@ package com.kugo.autoclicker
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import kotlin.random.Random
 
 /**
@@ -24,9 +25,14 @@ object Engine {
         appContext = context.applicationContext
     }
 
-    private fun shouldRun(): Boolean =
-        State.serviceRunning && State.enabled && State.mouseDown &&
+    private fun shouldRun(): Boolean {
+        // Segurança: se a ponte parou de avisar por 3 s, solta o mouse (evita cliques presos).
+        if (State.mouseExt && SystemClock.elapsedRealtime() - State.lastExtTime > 3000L) {
+            State.mouseExt = false
+        }
+        return State.serviceRunning && State.enabled && State.mouseDown &&
             KugoAccessibilityService.instance != null
+    }
 
     /** Reavalia o estado; chamável de qualquer thread. */
     fun refresh() {
@@ -80,7 +86,8 @@ object Engine {
         val dm = svc.resources.displayMetrics
         // Cursor capturado pelo jogo (modo relativo): não há posição absoluta confiável.
         // Toca no centro da tela (onde fica a mira no Minecraft).
-        val useCenter = State.relativeMode || x < 0f || y < 0f
+        val useCenter = State.relativeMode || x < 0f || y < 0f ||
+            (State.mouseExt && !State.mouseA11y)
         val px = if (useCenter) dm.widthPixels / 2f else x
         val py = if (useCenter) dm.heightPixels / 2f else y
         // Duração do toque proporcional ao intervalo (5–25 ms) para nunca sobrepor o próximo.

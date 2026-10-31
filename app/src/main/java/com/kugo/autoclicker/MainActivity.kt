@@ -133,6 +133,7 @@ class MainActivity : Activity() {
         findViewById<TextView>(R.id.tvLastKey).text = "Última tecla recebida: " + State.lastKeyName
         findViewById<TextView>(R.id.tvInput).text =
             "Mouse via acessibilidade: " + State.motionEvents + " eventos (último: " + State.lastMotion + ")\n" +
+            "Mouse via Termux/ADB: " + State.extEvents + " eventos\n" +
             "Mouse via root: " + State.inputEvents + " eventos (último: " + State.lastInput + ")\n" +
             "Cursor capturado pelo jogo (modo relativo): " + (if (State.relativeMode) "SIM" else "NÃO") + "\n" +
             "Toques: enviados " + State.tapsSent + ", concluídos " + State.tapsOk +

@@ -14,12 +14,18 @@ object State {
     /** Botão esquerdo pressionado segundo a leitura de /dev/input (root). */
     @Volatile var mouseRoot = false
 
+    /** Botão esquerdo pressionado segundo a ponte Termux/ADB (sem root). */
+    @Volatile var mouseExt = false
+    @Volatile var lastExtTime = 0L
+    @Volatile var extEvents = 0L
+
     /** Botão esquerdo do mouse fisicamente pressionado (qualquer fonte). */
-    val mouseDown: Boolean get() = mouseA11y || mouseRoot
+    val mouseDown: Boolean get() = mouseA11y || mouseRoot || mouseExt
 
     fun releaseMouse() {
         mouseA11y = false
         mouseRoot = false
+        mouseExt = false
     }
 
     /** Aguardando o usuário pressionar uma tecla para definir a tecla de ativação. */

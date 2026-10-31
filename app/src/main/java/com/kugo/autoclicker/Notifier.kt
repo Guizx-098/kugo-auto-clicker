@@ -33,7 +33,8 @@ object Notifier {
             "Tecla configurada: " + Prefs.keyName(ctx) + " (última recebida: " + State.lastKeyName + ")\n" +
             "Acessibilidade: " + (if (KugoAccessibilityService.instance != null) "ATIVA" else "DESATIVADA") + "\n" +
             "Mouse via root: " + root + "\n" +
-            "Mouse via acessibilidade: " + a11y
+            "Mouse via acessibilidade: " + a11y + "\n" +
+            "Mouse via Termux/ADB: " + (if (State.extEvents > 0) "recebendo" else "sem eventos")
     }
 
     fun build(ctx: Context): Notification {

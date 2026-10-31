@@ -27,7 +27,7 @@ class KugoAccessibilityService : AccessibilityService() {
         if (Build.VERSION.SDK_INT >= 34) {
             try {
                 val info = serviceInfo
-                info.motionEventSources = InputDevice.SOURCE_MOUSE or InputDevice.SOURCE_MOUSE_RELATIVE
+                info.motionEventSources = InputDevice.SOURCE_MOUSE
                 serviceInfo = info
             } catch (_: Throwable) {}
         }

@@ -26,6 +26,10 @@ Auto clicker para Android/emuladores controlado por **tecla global + botão esqu
 - O app não contorna mecanismos de segurança do Android nem sistemas antitrapaça. Verifique as regras do jogo/servidor antes de usar.
 - O projeto **ainda não foi testado em dispositivo/emulador**.
 
+## Ponte Termux/ADB para mouse capturado (v1.0.4)
+
+Dentro do Pojav/Zalith o jogo captura o mouse. Pedir esses eventos ao `AccessibilityService` (v1.0.3) **travou o movimento do mouse** no jogo, então a v1.0.4 voltou a pedir só o mouse comum. Para detectar o botão esquerdo com o cursor capturado **sem root**, use `termux/kugo-mouse.sh`: ele lê `adb shell getevent -l` (via Depuração sem fio, no próprio aparelho) e avisa o app por broadcast. Enquanto o botão está pressionado ele reenvia o aviso a cada ~1 s; se os avisos pararem por 3 s, o app solta o mouse sozinho. O broadcast é aceito de qualquer app, mas só tem efeito com o Auto Clicker ativado pela tecla.
+
 ## Minecraft (PojavLauncher / Zalith) — v1.0.3
 
 Dentro do jogo, o Minecraft **captura o cursor** e o Android passa a enviar eventos *relativos* do mouse. A v1.0.3 também escuta esses eventos (`SOURCE_MOUSE_RELATIVE`) e, nesse modo, toca no **centro da tela** (a mira) em vez de usar uma posição que não existe. O toque dura de 5 a 25 ms conforme o CPS. A tela principal mostra "Cursor capturado: SIM/NÃO" e a contagem de toques enviados, concluídos, cancelados e recusados, para diagnosticar se o jogo está recebendo os toques. Não foi testado dentro do jogo pelo autor.
