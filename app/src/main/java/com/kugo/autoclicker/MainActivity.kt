@@ -130,6 +130,9 @@ class MainActivity : Activity() {
         findViewById<TextView>(R.id.tvKeyInd).text = "Tecla configurada: " + Prefs.keyName(this)
         findViewById<TextView>(R.id.tvA11y).text =
             "Acessibilidade: " + if (a11yEnabled()) "ATIVA" else "DESATIVADA"
+        findViewById<TextView>(R.id.tvLastKey).text = "Última tecla recebida: " + State.lastKeyName
+        findViewById<TextView>(R.id.tvInput).text =
+            "Eventos de mouse/toque lidos: " + State.inputEvents + " (último: " + State.lastInput + ")"
         findViewById<TextView>(R.id.tvRoot).text = "Leitura do mouse (root): " + when (State.rootOk) {
             true -> "OK"
             false -> "SEM ROOT — mouse não detectável"

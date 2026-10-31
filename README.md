@@ -26,6 +26,10 @@ Auto clicker para Android/emuladores controlado por **tecla global + botão esqu
 - O app não contorna mecanismos de segurança do Android nem sistemas antitrapaça. Verifique as regras do jogo/servidor antes de usar.
 - O projeto **ainda não foi testado em dispositivo/emulador**.
 
+## Notificação de status e diagnóstico (v1.0.1)
+
+Com o serviço iniciado, uma notificação discreta mostra **ATIVADO/DESATIVADO**, o estado do mouse, a tecla configurada, a última tecla recebida, a acessibilidade e a leitura do mouse (root). A mesma informação aparece na tela principal, junto com a contagem de eventos de mouse/toque lidos. Se pressionar a tecla não muda nada, "Última tecla recebida" mostra se o Android entregou a tecla ao serviço; se segurar o mouse não muda nada, a contagem de eventos mostra se a leitura com root está recebendo algo.
+
 ## Instalação e permissões
 
 1. Instale o APK de **Releases**.

@@ -21,8 +21,14 @@ object Prefs {
         sp(c).edit().putInt("key", code).apply()
     }
 
+    @Volatile private var cachedKeyName = "NENHUMA"
+
+    fun keyNameOrNone(): String = cachedKeyName
+
     fun keyName(c: Context): String {
         val code = keyCode(c)
-        return if (code < 0) "NENHUMA" else KeyEvent.keyCodeToString(code).removePrefix("KEYCODE_")
+        val n = if (code < 0) "NENHUMA" else KeyEvent.keyCodeToString(code).removePrefix("KEYCODE_")
+        cachedKeyName = n
+        return n
     }
 }

@@ -18,4 +18,9 @@ object State {
 
     /** null = ainda verificando, true = root disponível, false = sem root. */
     @Volatile var rootOk: Boolean? = null
+
+    // Diagnóstico
+    @Volatile var lastKeyName = "nenhuma"
+    @Volatile var inputEvents = 0L
+    @Volatile var lastInput = "nenhum"
 }

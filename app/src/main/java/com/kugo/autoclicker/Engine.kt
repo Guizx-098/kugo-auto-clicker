@@ -33,6 +33,7 @@ object Engine {
     }
 
     private fun evaluate() {
+        appContext?.let { Notifier.update(it) }
         if (shouldRun()) {
             if (!scheduled) {
                 scheduled = true

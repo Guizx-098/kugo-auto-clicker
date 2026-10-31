@@ -40,9 +40,11 @@ object RootInputReader {
         try {
             if (!hasRoot()) {
                 State.rootOk = false
+                Engine.refresh()
                 return
             }
             State.rootOk = true
+            Engine.refresh()
             loadRanges()
 
             val p = ProcessBuilder("su", "-c", "exec getevent -l")
@@ -58,9 +60,11 @@ object RootInputReader {
                 if (t.size < 4) continue
                 if (t[1] != "EV_KEY" && t[1] != "EV_ABS") continue
                 val dev = t[0].trimEnd(':')
+                State.inputEvents++
 
                 when (t[2]) {
                     "BTN_LEFT", "BTN_TOUCH" -> {
+                        State.lastInput = t[2] + " " + t[3]
                         when (t[3]) {
                             "DOWN" -> State.mouseDown = true
                             "UP" -> State.mouseDown = false

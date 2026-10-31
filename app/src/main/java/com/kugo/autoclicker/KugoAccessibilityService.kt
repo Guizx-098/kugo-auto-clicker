@@ -21,6 +21,7 @@ class KugoAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         instance = this
         Engine.init(applicationContext)
+        Engine.refresh()
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {}
@@ -40,6 +41,10 @@ class KugoAccessibilityService : AccessibilityService() {
 
     override fun onKeyEvent(event: KeyEvent): Boolean {
         if (event.action != KeyEvent.ACTION_DOWN || event.repeatCount != 0) return false
+
+        State.lastKeyName = KeyEvent.keyCodeToString(event.keyCode).removePrefix("KEYCODE_")
+        Prefs.keyName(this)
+        Engine.refresh()
 
         if (State.capturing) {
             Prefs.saveKey(this, event.keyCode)
