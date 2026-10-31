@@ -34,6 +34,13 @@ object State {
     @Volatile var lastKeyName = "nenhuma"
     @Volatile var inputEvents = 0L
     @Volatile var lastInput = "nenhum"
+    /** true quando o jogo capturou o cursor (eventos relativos, ex.: Minecraft em jogo). */
+    @Volatile var relativeMode = false
+    @Volatile var tapsSent = 0L
+    @Volatile var tapsOk = 0L
+    @Volatile var tapsCancelled = 0L
+    @Volatile var tapsRejected = 0L
+    @Volatile var lastTap = "nenhum"
     @Volatile var motionEvents = 0L
     @Volatile var lastMotion = "nenhum"
 }

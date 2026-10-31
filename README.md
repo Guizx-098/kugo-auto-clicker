@@ -26,6 +26,10 @@ Auto clicker para Android/emuladores controlado por **tecla global + botão esqu
 - O app não contorna mecanismos de segurança do Android nem sistemas antitrapaça. Verifique as regras do jogo/servidor antes de usar.
 - O projeto **ainda não foi testado em dispositivo/emulador**.
 
+## Minecraft (PojavLauncher / Zalith) — v1.0.3
+
+Dentro do jogo, o Minecraft **captura o cursor** e o Android passa a enviar eventos *relativos* do mouse. A v1.0.3 também escuta esses eventos (`SOURCE_MOUSE_RELATIVE`) e, nesse modo, toca no **centro da tela** (a mira) em vez de usar uma posição que não existe. O toque dura de 5 a 25 ms conforme o CPS. A tela principal mostra "Cursor capturado: SIM/NÃO" e a contagem de toques enviados, concluídos, cancelados e recusados, para diagnosticar se o jogo está recebendo os toques. Não foi testado dentro do jogo pelo autor.
+
 ## Mouse sem root (v1.0.2)
 
 No **Android 14+ (API 34)** o serviço de acessibilidade pede os eventos de mouse (`onMotionEvent`) e acompanha o botão esquerdo sem root. Isso depende de o Android entregar eventos com origem `SOURCE_MOUSE` (mouse físico USB/Bluetooth no aparelho). Em Android anterior ao 14, ou se o emulador converter o mouse em toque, esse caminho não funciona e o app só detecta o mouse com root. A tela principal mostra a contagem de eventos de cada caminho.

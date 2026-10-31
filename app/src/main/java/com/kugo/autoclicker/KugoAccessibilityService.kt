@@ -27,7 +27,7 @@ class KugoAccessibilityService : AccessibilityService() {
         if (Build.VERSION.SDK_INT >= 34) {
             try {
                 val info = serviceInfo
-                info.motionEventSources = InputDevice.SOURCE_MOUSE
+                info.motionEventSources = InputDevice.SOURCE_MOUSE or InputDevice.SOURCE_MOUSE_RELATIVE
                 serviceInfo = info
             } catch (_: Throwable) {}
         }
@@ -40,9 +40,13 @@ class KugoAccessibilityService : AccessibilityService() {
      */
     override fun onMotionEvent(event: MotionEvent) {
         State.motionEvents++
-        State.lastMotion = MotionEvent.actionToString(event.actionMasked) + " botões=" + event.buttonState
+        val relative = event.isFromSource(InputDevice.SOURCE_MOUSE_RELATIVE)
+        State.relativeMode = relative
+        State.lastMotion = (if (relative) "RELATIVO " else "ABSOLUTO ") +
+            MotionEvent.actionToString(event.actionMasked) + " botões=" + event.buttonState
 
-        if (event.rawX > 0f || event.rawY > 0f) {
+        // Em modo relativo (cursor capturado) X/Y são deltas, não posição: não usar.
+        if (!relative && (event.rawX > 0f || event.rawY > 0f)) {
             Engine.x = event.rawX
             Engine.y = event.rawY
         }
@@ -89,14 +93,20 @@ class KugoAccessibilityService : AccessibilityService() {
     }
 
     /** Executa um toque curto. Retorna false se o sistema recusou o gesto. */
-    fun tap(x: Float, y: Float, handler: Handler, onDone: () -> Unit): Boolean {
+    fun tap(x: Float, y: Float, durationMs: Long, handler: Handler, onDone: () -> Unit): Boolean {
         val path = Path().apply { moveTo(x, y) }
         val gesture = GestureDescription.Builder()
-            .addStroke(GestureDescription.StrokeDescription(path, 0L, 5L))
+            .addStroke(GestureDescription.StrokeDescription(path, 0L, durationMs))
             .build()
         return dispatchGesture(gesture, object : GestureResultCallback() {
-            override fun onCompleted(g: GestureDescription?) = onDone()
-            override fun onCancelled(g: GestureDescription?) = onDone()
+            override fun onCompleted(g: GestureDescription?) {
+                State.tapsOk++
+                onDone()
+            }
+            override fun onCancelled(g: GestureDescription?) {
+                State.tapsCancelled++
+                onDone()
+            }
         }, handler)
     }
 }

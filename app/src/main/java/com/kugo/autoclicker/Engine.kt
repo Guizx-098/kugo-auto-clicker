@@ -14,6 +14,7 @@ object Engine {
     private var appContext: Context? = null
     private var scheduled = false
     private var inFlight = false
+    private var lastDelayMs = 80L
 
     /** Última posição conhecida do ponteiro (pixels da tela). -1 = desconhecida. */
     @Volatile var x = -1f
@@ -70,16 +71,28 @@ object Engine {
         val hi = maxOf(a, b).toFloat()
         val cps = if (lo == hi) lo else lo + Random.nextFloat() * (hi - lo)
         State.currentCps = cps
-        return (1000f / cps).toLong().coerceAtLeast(1L)
+        lastDelayMs = (1000f / cps).toLong().coerceAtLeast(1L)
+        return lastDelayMs
     }
 
     private fun fire() {
         val svc = KugoAccessibilityService.instance ?: return
         val dm = svc.resources.displayMetrics
-        val px = if (x >= 0f) x else dm.widthPixels / 2f
-        val py = if (y >= 0f) y else dm.heightPixels / 2f
+        // Cursor capturado pelo jogo (modo relativo): não há posição absoluta confiável.
+        // Toca no centro da tela (onde fica a mira no Minecraft).
+        val useCenter = State.relativeMode || x < 0f || y < 0f
+        val px = if (useCenter) dm.widthPixels / 2f else x
+        val py = if (useCenter) dm.heightPixels / 2f else y
+        // Duração do toque proporcional ao intervalo (5–25 ms) para nunca sobrepor o próximo.
+        val dur = (lastDelayMs * 0.4).toLong().coerceIn(5L, 25L)
         inFlight = true
-        val ok = svc.tap(px, py, handler) { inFlight = false }
-        if (!ok) inFlight = false
+        State.tapsSent++
+        State.lastTap = "(" + px.toInt() + "," + py.toInt() + ") " + dur + "ms" +
+            if (useCenter) " centro" else ""
+        val ok = svc.tap(px, py, dur, handler) { inFlight = false }
+        if (!ok) {
+            inFlight = false
+            State.tapsRejected++
+        }
     }
 }

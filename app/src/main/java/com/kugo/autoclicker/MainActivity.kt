@@ -134,6 +134,10 @@ class MainActivity : Activity() {
         findViewById<TextView>(R.id.tvInput).text =
             "Mouse via acessibilidade: " + State.motionEvents + " eventos (último: " + State.lastMotion + ")\n" +
             "Mouse via root: " + State.inputEvents + " eventos (último: " + State.lastInput + ")\n" +
+            "Cursor capturado pelo jogo (modo relativo): " + (if (State.relativeMode) "SIM" else "NÃO") + "\n" +
+            "Toques: enviados " + State.tapsSent + ", concluídos " + State.tapsOk +
+            ", cancelados " + State.tapsCancelled + ", recusados " + State.tapsRejected + "\n" +
+            "Último toque: " + State.lastTap + "\n" +
             "Android: " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")"
         findViewById<TextView>(R.id.tvRoot).text = "Mouse via root: " + when (State.rootOk) {
             true -> "OK"
