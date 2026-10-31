@@ -25,6 +25,8 @@ class KugoForegroundService : Service() {
         }
 
         RootInputReader.start(applicationContext)
+        ShizukuBridge.init(applicationContext)
+        ShizukuBridge.tryBind()
         return START_STICKY
     }
 
@@ -33,6 +35,7 @@ class KugoForegroundService : Service() {
         State.enabled = false
         State.releaseMouse()
         RootInputReader.stop()
+        ShizukuBridge.unbind()
         Engine.refresh()
         super.onDestroy()
     }

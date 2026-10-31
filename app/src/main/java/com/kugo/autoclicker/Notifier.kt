@@ -34,7 +34,9 @@ object Notifier {
             "Acessibilidade: " + (if (KugoAccessibilityService.instance != null) "ATIVA" else "DESATIVADA") + "\n" +
             "Mouse via root: " + root + "\n" +
             "Mouse via acessibilidade: " + a11y + "\n" +
-            "Mouse via Termux/ADB: " + (if (State.extEvents > 0) "recebendo" else "sem eventos")
+            "Mouse via Termux/ADB: " + (if (State.extEvents > 0) "recebendo" else "sem eventos") + "\n" +
+            "Shizuku: " + ShizukuBridge.statusText(ctx) + "\n" +
+            "Modo de clique: " + Prefs.clickModeName(ctx)
     }
 
     fun build(ctx: Context): Notification {

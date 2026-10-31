@@ -83,6 +83,13 @@ class MainActivity : Activity() {
             stopService(Intent(this, KugoForegroundService::class.java))
             State.enabled = false
         }
+        ShizukuBridge.init(this)
+        findViewById<Button>(R.id.btnShizuku).setOnClickListener { ShizukuBridge.connect(this) }
+        findViewById<Button>(R.id.btnMode).setOnClickListener {
+            val next = if (Prefs.clickMode(this) >= 3) 1 else Prefs.clickMode(this) + 1
+            Prefs.saveClickMode(this, next)
+            Engine.refresh()
+        }
         findViewById<Button>(R.id.btnAccess).setOnClickListener {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
@@ -130,6 +137,8 @@ class MainActivity : Activity() {
         findViewById<TextView>(R.id.tvKeyInd).text = "Tecla configurada: " + Prefs.keyName(this)
         findViewById<TextView>(R.id.tvA11y).text =
             "Acessibilidade: " + if (a11yEnabled()) "ATIVA" else "DESATIVADA"
+        findViewById<TextView>(R.id.tvShizuku).text = "Shizuku: " + ShizukuBridge.statusText(this)
+        findViewById<Button>(R.id.btnMode).text = "MODO DE CLIQUE: " + Prefs.clickModeName(this)
         findViewById<TextView>(R.id.tvLastKey).text = "Última tecla recebida: " + State.lastKeyName
         findViewById<TextView>(R.id.tvInput).text =
             "Mouse via acessibilidade: " + State.motionEvents + " eventos (último: " + State.lastMotion + ")\n" +

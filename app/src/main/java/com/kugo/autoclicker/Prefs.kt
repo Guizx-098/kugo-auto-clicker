@@ -17,6 +17,19 @@ object Prefs {
         sp(c).edit().putInt("min", lo).putInt("max", hi).apply()
     }
 
+    /** 1 = mouse absoluto (shell), 2 = mouse capturado (shell), 3 = toque (acessibilidade). */
+    fun clickMode(c: Context): Int = sp(c).getInt("mode", 1).coerceIn(1, 3)
+
+    fun saveClickMode(c: Context, mode: Int) {
+        sp(c).edit().putInt("mode", mode.coerceIn(1, 3)).apply()
+    }
+
+    fun clickModeName(c: Context): String = when (clickMode(c)) {
+        1 -> "MOUSE ABSOLUTO (shell)"
+        2 -> "MOUSE CAPTURADO (shell)"
+        else -> "TOQUE (acessibilidade)"
+    }
+
     fun saveKey(c: Context, code: Int) {
         sp(c).edit().putInt("key", code).apply()
     }

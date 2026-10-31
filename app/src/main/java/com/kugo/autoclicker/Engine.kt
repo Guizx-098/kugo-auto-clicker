@@ -90,6 +90,14 @@ object Engine {
             (State.mouseExt && !State.mouseA11y)
         val px = if (useCenter) dm.widthPixels / 2f else x
         val py = if (useCenter) dm.heightPixels / 2f else y
+        // Shizuku conectado e modo 1/2: clique de mouse REAL (botão esquerdo) via shell.
+        val mode = appContext?.let { Prefs.clickMode(it) } ?: 3
+        if (mode != 3 && ShizukuBridge.connected) {
+            State.tapsSent++
+            State.lastTap = "(" + px.toInt() + "," + py.toInt() + ") shell modo " + mode
+            ShizukuBridge.click(px, py, mode)
+            return
+        }
         // Duração do toque proporcional ao intervalo (5–25 ms) para nunca sobrepor o próximo.
         val dur = (lastDelayMs * 0.4).toLong().coerceIn(5L, 25L)
         inFlight = true

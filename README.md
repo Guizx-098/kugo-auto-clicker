@@ -26,6 +26,10 @@ Auto clicker para Android/emuladores controlado por **tecla global + botão esqu
 - O app não contorna mecanismos de segurança do Android nem sistemas antitrapaça. Verifique as regras do jogo/servidor antes de usar.
 - O projeto **ainda não foi testado em dispositivo/emulador**.
 
+## Shizuku: clique esquerdo real e mouse capturado (v1.1.0)
+
+Com o **Shizuku** instalado e iniciado, o KUGO liga um serviço no processo de shell que (1) lê o botão esquerdo em `/dev/input` mesmo com o cursor capturado e (2) injeta **cliques de mouse reais (botão esquerdo)**. Fluxo: instalar o Shizuku → iniciá-lo (o próprio Shizuku guia o pareamento da Depuração sem fio; ou root) → no KUGO tocar em **CONECTAR SHIZUKU**, conceder a permissão e tocar em **INICIAR**. O botão **MODO DE CLIQUE** alterna: 1 mouse absoluto (shell), 2 mouse capturado (shell), 3 toque (acessibilidade). Se um modo não funcionar no jogo, teste o outro. Não foi testado em jogo pelo autor. O Shizuku precisa ser reiniciado após reiniciar o aparelho (modo sem root).
+
 ## Limitação: botão esquerdo x direito no Pojav/Zalith (v1.0.5)
 
 O app gera **toques** (`dispatchGesture`). O Pojav/Zalith interpreta um toque curto como **botão direito** (usar/colocar) e só um toque longo como botão esquerdo (atacar/quebrar). Por isso os cliques automáticos saem no botão direito dentro desses launchers. Gerar **cliques de mouse esquerdo reais** exige injeção de eventos de mouse com permissão de shell (via ADB), não só acessibilidade.

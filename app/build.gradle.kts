@@ -11,8 +11,8 @@ android {
         applicationId = "com.kugo.autoclicker"
         minSdk = 24
         targetSdk = 34
-        versionCode = 6
-        versionName = "1.0.5"
+        versionCode = 7
+        versionName = "1.1.0"
     }
 
     signingConfigs {
@@ -42,4 +42,9 @@ android {
         abortOnError = false
         checkReleaseBuilds = false
     }
+}
+
+dependencies {
+    implementation("dev.rikka.shizuku:api:13.1.5")
+    implementation("dev.rikka.shizuku:provider:13.1.5")
 }
